@@ -1,0 +1,1414 @@
+<meta charset="UTF-8">
+<title>Roadside — Identity Systems for Main Street</title>
+<style>
+  /* ===================== TOKENS ===================== */
+  :root{
+    --rs-ink:#14161A;
+    --rs-paper:#ECEAE3;
+    --rs-paper-raise:#F6F4EE;
+    --rs-signal:#FF4A1C;
+    --rs-line:#C9C4B8;
+    --rs-mute:#6B6F76;
+    --rs-shadow:rgba(20,22,26,.16);
+
+    --font-display:'Arial Narrow','Roboto Condensed',-apple-system,'Segoe UI',sans-serif;
+    --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --rs-ink:#EDEBE3;
+      --rs-paper:#111214;
+      --rs-paper-raise:#1A1B1E;
+      --rs-line:#34363A;
+      --rs-mute:#94979E;
+      --rs-signal:#FF6A3C;
+      --rs-shadow:rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --rs-ink:#EDEBE3; --rs-paper:#111214; --rs-paper-raise:#1A1B1E;
+    --rs-line:#34363A; --rs-mute:#94979E; --rs-signal:#FF6A3C; --rs-shadow:rgba(0,0,0,.5);
+  }
+  :root[data-theme="light"]{
+    --rs-ink:#14161A; --rs-paper:#ECEAE3; --rs-paper-raise:#F6F4EE;
+    --rs-line:#C9C4B8; --rs-mute:#6B6F76; --rs-signal:#FF4A1C; --rs-shadow:rgba(20,22,26,.16);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--rs-paper);
+    color:var(--rs-ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--rs-signal); color:#fff; }
+  a{ color:inherit; }
+  h1,h2,h3,h4{ text-wrap:balance; margin:0; }
+  p{ margin:0; }
+  img,svg{ display:block; max-width:100%; }
+  button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+
+  :focus-visible{ outline:2px solid var(--rs-signal); outline-offset:3px; }
+
+  .wrap{ max-width:1180px; margin-inline:auto; padding-inline:clamp(1.25rem,5vw,3rem); }
+  .section{ padding-block:clamp(3rem,8vw,6rem); }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--rs-mute); font-variant-numeric:tabular-nums;
+  }
+
+  /* ===================== NAV ===================== */
+  .shell-nav{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.85rem clamp(1.25rem,5vw,3rem);
+    background:color-mix(in srgb, var(--rs-paper) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--rs-line);
+  }
+  .shell-logo{
+    font-family:var(--font-display); font-weight:800; font-stretch:condensed;
+    font-size:1.15rem; letter-spacing:.02em; text-transform:uppercase;
+    display:flex; align-items:center; gap:.4rem;
+  }
+  .shell-logo .dot{ width:7px; height:7px; background:var(--rs-signal); border-radius:1px; display:inline-block; }
+  .shell-nav-links{ display:flex; gap:clamp(1rem,3vw,2rem); list-style:none; margin:0; padding:0; align-items:center; }
+  .shell-nav-links a{
+    text-decoration:none; font-size:.82rem; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--rs-mute); transition:color .15s;
+  }
+  .shell-nav-links a:hover{ color:var(--rs-ink); }
+  .theme-switch{
+    display:flex; border:1px solid var(--rs-line); border-radius:999px; overflow:hidden;
+  }
+  .theme-switch button{ padding:.3rem .65rem; font-size:.72rem; font-family:var(--font-mono); }
+  .theme-switch button[aria-pressed="true"]{ background:var(--rs-ink); color:var(--rs-paper); }
+
+  /* ===================== HERO ===================== */
+  .hero{
+    padding:clamp(4rem,10vw,7rem) clamp(1.25rem,5vw,3rem) clamp(3rem,6vw,4rem);
+    position:relative;
+    border-bottom:1px solid var(--rs-line);
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--rs-line) 39px, var(--rs-line) 40px) left/1px 100% no-repeat,
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--rs-line) 39px, var(--rs-line) 40px) right/1px 100% no-repeat;
+    background-color:var(--rs-paper);
+    opacity:1;
+  }
+  .hero-inner{ max-width:1180px; margin-inline:auto; }
+  .hero-meta{
+    display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin-bottom:1.75rem;
+  }
+  .hero-title{
+    font-family:var(--font-display); font-weight:800; font-stretch:condensed;
+    text-transform:uppercase; letter-spacing:-.01em;
+    font-size:clamp(3.2rem,11vw,8.5rem); line-height:.88;
+  }
+  .hero-title em{ font-style:normal; color:var(--rs-signal); }
+  .hero-sub{
+    max-width:38rem; margin-top:1.5rem; font-size:clamp(1rem,2vw,1.2rem);
+    color:var(--rs-mute);
+  }
+  .hero-row{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:2rem; flex-wrap:wrap;
+    margin-top:2.5rem;
+  }
+  .hero-crosses{ display:flex; gap:1rem; }
+  .reg-cross{ width:16px; height:16px; position:relative; opacity:.5; }
+  .reg-cross::before,.reg-cross::after{ content:''; position:absolute; background:var(--rs-ink); }
+  .reg-cross::before{ left:50%; top:0; width:1px; height:100%; transform:translateX(-50%); }
+  .reg-cross::after{ top:50%; left:0; height:1px; width:100%; transform:translateY(-50%); }
+
+  /* ===================== PHILOSOPHY ===================== */
+  .philosophy{ border-bottom:1px solid var(--rs-line); }
+  .philosophy-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:2.5rem;
+    margin-top:2.5rem;
+  }
+  .philosophy-head{ max-width:34rem; }
+  .philosophy-head h2{
+    font-family:var(--font-display); font-weight:800; font-stretch:condensed; text-transform:uppercase;
+    font-size:clamp(1.8rem,4vw,2.6rem); margin-top:.5rem;
+  }
+  .field-note{ border-top:1px solid var(--rs-line); padding-top:1.1rem; }
+  .field-note .num{ font-family:var(--font-mono); color:var(--rs-signal); font-size:.8rem; }
+  .field-note h3{ font-size:1.05rem; margin-top:.5rem; margin-bottom:.5rem; }
+  .field-note p{ color:var(--rs-mute); font-size:.92rem; }
+
+  /* ===================== INDEX (job tickets) ===================== */
+  .index-list{ display:flex; flex-direction:column; gap:1.25rem; margin-top:2.5rem; }
+  .ticket{
+    display:grid; grid-template-columns:5.5rem 1fr auto; gap:1.5rem; align-items:center;
+    padding:1.5rem; border:1px solid var(--rs-line); border-radius:4px;
+    background:var(--rs-paper-raise);
+    text-decoration:none; color:inherit;
+    transition:border-color .15s, transform .15s;
+  }
+  .ticket:hover{ border-color:var(--rs-ink); }
+  @media (prefers-reduced-motion:no-preference){ .ticket:hover{ transform:translateX(4px); } }
+  .ticket-no{ font-family:var(--font-mono); font-size:.78rem; color:var(--rs-mute); }
+  .ticket-no b{ display:block; font-size:1.4rem; color:var(--rs-ink); font-family:var(--font-display); }
+  .ticket-mark{
+    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .ticket-body{ display:flex; align-items:center; gap:1.1rem; min-width:0; }
+  .ticket-text h3{ font-size:1.15rem; }
+  .ticket-text span{ display:block; font-size:.8rem; color:var(--rs-mute); margin-top:.15rem; }
+  .ticket-swatches{ display:flex; gap:.3rem; }
+  .ticket-swatches i{ width:14px; height:14px; border-radius:50%; display:block; }
+  .ticket-cta{ font-family:var(--font-mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
+  @media (max-width:640px){
+    .ticket{ grid-template-columns:1fr; }
+    .ticket-cta{ justify-self:start; }
+  }
+
+  /* ===================== CASEFILE SHARED ===================== */
+  .casefile{
+    border-bottom:8px solid var(--rs-ink);
+    background:var(--b-paper);
+    color:var(--b-ink);
+  }
+  .casefile-strip{
+    display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;
+    padding:.9rem clamp(1.25rem,5vw,3rem);
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+    border-bottom:1px solid color-mix(in srgb, var(--b-ink) 18%, transparent);
+  }
+  .tab-strip{
+    display:flex; flex-wrap:wrap; gap:.4rem;
+    padding:0 clamp(1.25rem,5vw,3rem); margin-top:1.5rem;
+  }
+  .tab-btn{
+    padding:.55rem 1rem; border:1px solid color-mix(in srgb, var(--b-ink) 30%, transparent);
+    border-bottom:none; border-radius:6px 6px 0 0;
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.04em; text-transform:uppercase;
+    color:color-mix(in srgb, var(--b-ink) 65%, transparent);
+    background:color-mix(in srgb, var(--b-ink) 5%, transparent);
+  }
+  .tab-btn[aria-selected="true"]{
+    background:var(--b-ink); color:var(--b-paper);
+    border-color:var(--b-ink);
+  }
+  .brand-pages{ border-top:1px solid color-mix(in srgb, var(--b-ink) 30%, transparent); }
+  .brand-page{ display:none; padding:clamp(2.5rem,6vw,4.5rem) clamp(1.25rem,5vw,3rem) clamp(3.5rem,7vw,5rem); }
+  .brand-page.active{ display:block; }
+  .page-kicker{ font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; opacity:.65; }
+  .page-title{
+    font-family:var(--b-display); font-weight:var(--b-display-weight,800);
+    text-transform:var(--b-display-case,uppercase); letter-spacing:var(--b-display-tracking,-.01em);
+    font-size:clamp(1.8rem,4vw,2.9rem); margin-top:.4rem; margin-bottom:2.25rem;
+  }
+
+  /* ---- cover / story page ---- */
+  .cover-grid{ display:grid; grid-template-columns:minmax(220px,340px) 1fr; gap:3rem; align-items:start; }
+  .cover-mark-box{
+    aspect-ratio:1; border:1px solid color-mix(in srgb, var(--b-ink) 25%, transparent);
+    border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--b-ink) 4%, transparent); padding:2rem;
+  }
+  .wordmark{
+    font-family:var(--b-display); font-weight:var(--b-display-weight,800);
+    text-transform:var(--b-display-case,uppercase); letter-spacing:var(--b-display-tracking,-.01em);
+    font-size:clamp(2.4rem,6vw,4.2rem); line-height:1;
+  }
+  .wordmark em{ font-style:normal; color:var(--b-accent); }
+  .tagline{ font-size:1.05rem; color:color-mix(in srgb, var(--b-ink) 65%, transparent); margin-top:.9rem; max-width:34rem; }
+  .cover-meta{ display:flex; flex-wrap:wrap; gap:1.75rem; margin-top:2rem; }
+  .cover-meta div{ font-size:.82rem; }
+  .cover-meta b{ display:block; font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; opacity:.6; margin-bottom:.25rem; }
+  .story-copy{ margin-top:2.5rem; max-width:52rem; display:flex; flex-direction:column; gap:1.1rem; font-size:1rem; }
+  .story-copy p:first-child{ font-size:1.15rem; }
+
+  /* ---- logo system page ---- */
+  .logo-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; }
+  .lockup-box{
+    border:1px solid color-mix(in srgb, var(--b-ink) 22%, transparent); border-radius:8px;
+    padding:2rem 1.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.9rem;
+    min-height:180px; text-align:center;
+  }
+  .lockup-box.on-ink{ background:var(--b-ink); color:var(--b-paper); }
+  .lockup-box.on-ink .wordmark{ color:var(--b-paper); }
+  .lockup-box.on-ink .wordmark em{ color:var(--b-accent); }
+  .lockup-box.mono .wordmark{ color:var(--b-ink); }
+  .lockup-box.mono .wordmark em{ color:var(--b-ink); }
+  .lockup-box .icon-wrap{ width:56px; height:56px; }
+  .lockup-label{ font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; opacity:.6; }
+
+  .clearspace-demo{
+    border:1px dashed color-mix(in srgb, var(--b-ink) 40%, transparent); border-radius:8px;
+    padding:2.5rem; display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .clearspace-demo .icon-wrap{ width:64px; height:64px; }
+
+  .rules-list{ list-style:none; margin:1.25rem 0 0; padding:0; display:grid; gap:.6rem; font-size:.9rem; }
+  .rules-list li{ display:flex; gap:.6rem; }
+  .rules-list li::before{ content:'—'; opacity:.5; flex-shrink:0; }
+
+  .donts-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1.25rem; margin-top:1.25rem; }
+  .dont-box{
+    border:1px solid color-mix(in srgb, var(--b-ink) 20%, transparent); border-radius:8px;
+    padding:1.5rem 1rem; text-align:center; position:relative; display:flex; flex-direction:column; align-items:center; gap:.6rem;
+  }
+  .no-badge{ width:26px; height:26px; border-radius:50%; border:2px solid var(--b-accent); position:relative; }
+  .no-badge::after{ content:''; position:absolute; inset:4px 11px; background:var(--b-accent); transform:rotate(45deg); }
+  .dont-label{ font-size:.75rem; opacity:.65; }
+  .dont-icon{ width:44px; height:44px; }
+  .dont-skew{ transform:skewX(-18deg) scaleY(.8); }
+  .dont-stretch{ transform:scaleX(1.9); }
+  .dont-recolor{ filter:invert(1) hue-rotate(90deg); }
+  .dont-crowd{ padding:2px; }
+
+  /* ---- color & type page ---- */
+  .swatch-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; }
+  .swatch{
+    border-radius:8px; padding:1.1rem; min-height:120px; display:flex; flex-direction:column; justify-content:space-between;
+    border:1px solid color-mix(in srgb, var(--b-ink) 15%, transparent);
+  }
+  .swatch b{ font-family:var(--font-mono); font-size:.85rem; }
+  .swatch span{ display:block; font-family:var(--font-mono); font-size:.68rem; opacity:.75; margin-top:.15rem; }
+  .swatch em{ font-style:normal; font-size:.68rem; opacity:.6; text-transform:uppercase; letter-spacing:.05em; }
+
+  .type-specimen{ margin-top:2.5rem; display:grid; gap:1.75rem; }
+  .type-block{ border-top:1px solid color-mix(in srgb, var(--b-ink) 20%, transparent); padding-top:1.25rem; }
+  .type-block .label-row{ display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; opacity:.6; margin-bottom:.6rem; }
+  .type-display-sample{ font-family:var(--b-display); font-weight:var(--b-display-weight,800); text-transform:var(--b-display-case,uppercase); letter-spacing:var(--b-display-tracking,-.01em); font-size:clamp(1.6rem,4vw,2.6rem); }
+  .type-body-sample{ font-family:var(--b-body); max-width:38rem; font-size:1rem; }
+  .weight-scale{ display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:.5rem; }
+  .weight-scale span{ font-family:var(--b-display); }
+
+  /* ---- generic two-col page layout ---- */
+  .app-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2.5rem; }
+  .app-block{ display:flex; flex-direction:column; gap:1rem; }
+  .app-label{ font-family:var(--font-mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; opacity:.65; }
+
+  /* ---- business card mockup ---- */
+  .mockup-card{
+    width:100%; max-width:340px; aspect-ratio:1.75/1; border-radius:8px; position:relative;
+    box-shadow:0 12px 28px -10px var(--rs-shadow);
+    padding:1.4rem; display:flex; flex-direction:column; justify-content:space-between;
+    background:var(--b-ink); color:var(--b-paper);
+  }
+  .mockup-card.alt{ background:var(--b-paper); color:var(--b-ink); border:1px solid color-mix(in srgb, var(--b-ink) 20%, transparent); box-shadow:none; }
+  .mockup-card .icon-wrap{ width:30px; height:30px; }
+  .mockup-card .cc-name{ font-family:var(--b-display); font-weight:var(--b-display-weight,800); text-transform:var(--b-display-case,uppercase); font-size:1rem; letter-spacing:var(--b-display-tracking,0); }
+  .mockup-card .cc-role{ font-family:var(--font-mono); font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; opacity:.7; margin-top:.2rem; }
+  .mockup-card .cc-contact{ font-family:var(--font-mono); font-size:.62rem; opacity:.75; line-height:1.6; }
+  .card-stack{ position:relative; z-index:0; padding-bottom:14px; padding-right:14px; }
+  .card-stack .mockup-card:first-child{ position:relative; z-index:1; }
+  .card-stack .mockup-card:last-child{ position:absolute; top:14px; left:14px; z-index:0; opacity:.85; }
+
+  /* ---- letterhead mockup ---- */
+  .mockup-letter{
+    background:var(--b-paper); color:var(--b-ink); border:1px solid color-mix(in srgb, var(--b-ink) 18%, transparent);
+    aspect-ratio:8.5/11; max-width:300px; padding:1.6rem 1.5rem; box-shadow:0 12px 28px -10px var(--rs-shadow);
+    display:flex; flex-direction:column;
+  }
+  .mockup-letter .lh-head{ display:flex; align-items:center; gap:.6rem; padding-bottom:1rem; border-bottom:2px solid var(--b-accent); }
+  .mockup-letter .lh-head .icon-wrap{ width:26px; height:26px; }
+  .mockup-letter .lh-head .wordmark{ font-size:1rem; }
+  .mockup-letter .lh-body{ font-size:.6rem; line-height:1.7; margin-top:1.1rem; opacity:.85; flex:1; }
+  .mockup-letter .lh-foot{ font-family:var(--font-mono); font-size:.5rem; opacity:.55; border-top:1px solid color-mix(in srgb, var(--b-ink) 20%, transparent); padding-top:.6rem; }
+
+  /* ---- brochure / menu spread ---- */
+  .mockup-spread{
+    display:flex; box-shadow:0 16px 32px -12px var(--rs-shadow); border-radius:4px; overflow:hidden;
+    max-width:520px;
+  }
+  .mockup-spread .panel{ flex:1; padding:1.5rem 1.3rem; min-width:0; }
+  .mockup-spread .panel.dark{ background:var(--b-ink); color:var(--b-paper); }
+  .mockup-spread .panel.light{ background:var(--b-paper); color:var(--b-ink); }
+  .menu-item{ display:flex; justify-content:space-between; gap:.5rem; font-size:.72rem; padding:.45rem 0; border-bottom:1px dotted color-mix(in srgb, currentColor 30%, transparent); }
+  .menu-item span:last-child{ font-family:var(--font-mono); white-space:nowrap; }
+  .menu-item small{ display:block; opacity:.6; font-weight:400; font-size:.9em; }
+
+  /* ---- signage mockup ---- */
+  .mockup-signage{
+    position:relative; padding:2.5rem 1rem 3.5rem;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--rs-ink) 6%, var(--rs-paper)) 0%, color-mix(in srgb, var(--rs-ink) 6%, var(--rs-paper)) 100%);
+    border-radius:8px;
+  }
+  .mockup-signage .board{
+    background:var(--b-ink); color:var(--b-paper); border-radius:6px; padding:1.4rem 2rem;
+    display:flex; align-items:center; justify-content:center; gap:.8rem;
+    box-shadow:0 18px 30px -14px var(--rs-shadow); border:3px solid var(--b-accent);
+  }
+  .mockup-signage .board .icon-wrap{ width:34px; height:34px; }
+  .mockup-signage .pole{ width:6px; height:2.5rem; background:var(--rs-mute); margin:0 auto; }
+  .mockup-signage .base{ width:70px; height:8px; background:var(--rs-mute); margin:0 auto; border-radius:2px; }
+
+  /* ---- vehicle wrap mockup ---- */
+  .mockup-van-wrap{ background:color-mix(in srgb, var(--rs-ink) 5%, var(--rs-paper)); border-radius:8px; padding:1.5rem; }
+
+  /* ---- billboard mockup ---- */
+  .mockup-billboard-scene{
+    background:linear-gradient(180deg,#8fb7d6 0%, #cfe0ea 55%, #b9b6a6 55%, #a9a58f 100%);
+    border-radius:8px; padding:2.5rem 1rem 1rem; position:relative; overflow:hidden;
+  }
+  :root[data-theme="dark"] .mockup-billboard-scene, @media (prefers-color-scheme:dark){ .mockup-billboard-scene{ filter:brightness(.8) saturate(.9); } }
+
+  /* ---- trade show booth ---- */
+  .mockup-booth{ background:color-mix(in srgb, var(--rs-ink) 5%, var(--rs-paper)); border-radius:8px; padding:1.5rem; }
+
+  /* ---- cup / packaging ---- */
+  .mockup-pack-row{ display:flex; gap:2rem; align-items:flex-end; flex-wrap:wrap; }
+
+  /* ---- shirt mockup ---- */
+  .mockup-shirt-wrap{ display:flex; justify-content:center; }
+
+  .caption{ font-size:.78rem; color:color-mix(in srgb, var(--b-ink) 60%, transparent); margin-top:.15rem; }
+
+  /* ---- style guide recap ---- */
+  .recap-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; margin-top:1.5rem; }
+  .recap-card{ border:1px solid color-mix(in srgb, var(--b-ink) 20%, transparent); border-radius:8px; padding:1.25rem; }
+  .recap-card h4{ font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:.6rem; opacity:.7; }
+  .recap-card ul{ margin:0; padding-left:1.1rem; font-size:.85rem; display:flex; flex-direction:column; gap:.35rem; }
+
+  /* ===================== FOOTER ===================== */
+  .shell-foot{
+    padding:3rem clamp(1.25rem,5vw,3rem) 4rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:1.5rem;
+  }
+  .shell-foot .foot-mark{ font-family:var(--font-display); font-weight:800; font-stretch:condensed; text-transform:uppercase; font-size:1.3rem; }
+  .shell-foot p{ color:var(--rs-mute); font-size:.85rem; max-width:26rem; }
+
+  @media (prefers-reduced-motion:no-preference){
+    .brand-page.active{ animation:fadein .25s ease; }
+  }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  @media (max-width:760px){
+    .cover-grid{ grid-template-columns:1fr; }
+  }
+</style>
+
+<!-- shared icon symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="icon-ember" viewBox="0 0 100 100">
+      <path d="M50 8 C58 8 62 16 60 24 C68 22 76 28 74 36 C82 36 88 44 84 52 C90 54 92 62 86 66 C88 72 84 78 76 78 C76 86 68 92 60 88 C56 94 44 94 40 88 C32 92 24 86 24 78 C16 78 12 72 14 66 C8 62 10 54 16 52 C12 44 18 36 26 36 C24 28 32 22 40 24 C38 16 42 8 50 8 Z" fill="currentColor" opacity=".85"/>
+      <path d="M50 40 C58 46 62 56 54 66 C50 70 44 70 40 66 C34 58 38 48 46 42 C47 41 49 40 50 40 Z" fill="var(--b-accent)"/>
+    </symbol>
+    <symbol id="icon-pronto" viewBox="0 0 100 100">
+      <polygon points="26,34 32,14 38,34" fill="var(--b-accent)"/>
+      <polygon points="36,32 42,10 48,32" fill="var(--b-accent)"/>
+      <polygon points="46,34 52,16 58,34" fill="var(--b-accent)"/>
+      <ellipse cx="42" cy="55" rx="25" ry="23" fill="currentColor"/>
+      <polygon points="66,50 90,57 66,66" fill="var(--b-accent)"/>
+      <circle cx="35" cy="49" r="4.2" fill="var(--b-paper)"/>
+    </symbol>
+    <symbol id="icon-ironclad" viewBox="0 0 100 100">
+      <path d="M50 6 L82 20 L82 55 C82 78 68 92 50 98 C32 92 18 78 18 55 L18 20 Z" fill="none" stroke="currentColor" stroke-width="5"/>
+      <polygon points="50,36 63,44 63,60 50,68 37,60 37,44" fill="none" stroke="currentColor" stroke-width="4"/>
+      <rect x="20" y="48.5" width="60" height="7" rx="2" fill="var(--b-accent)" transform="rotate(-34 50 52)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="shell">
+
+  <nav class="shell-nav" aria-label="Primary">
+    <div class="shell-logo"><span>Roadside</span><span class="dot" aria-hidden="true"></span></div>
+    <ul class="shell-nav-links" role="list">
+      <li><a href="#philosophy">Approach</a></li>
+      <li><a href="#index">Casefiles</a></li>
+      <li><a href="#case-ember">Ember &amp; Grove</a></li>
+      <li><a href="#case-pronto">Pronto Bird</a></li>
+      <li><a href="#case-ironclad">Ironclad</a></li>
+    </ul>
+    <div class="theme-switch" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero" id="hero">
+    <div class="hero-inner">
+      <div class="hero-meta">
+        <span class="eyebrow">Studio No. 004</span>
+        <span class="eyebrow">Est. 2026</span>
+        <span class="eyebrow">Identity + Signage + Print</span>
+      </div>
+      <h1 class="hero-title">Signs for<br>the block<br><em>you're on.</em></h1>
+      <p class="hero-sub">Roadside is a small identity studio for the businesses people actually drive past — restaurants, drive-thrus, and repair bays. Three casefiles below, built end to end: mark, palette, and every surface it has to survive on.</p>
+      <div class="hero-row">
+        <div class="hero-crosses" aria-hidden="true">
+          <span class="reg-cross"></span><span class="reg-cross"></span><span class="reg-cross"></span>
+        </div>
+        <a href="#index" class="eyebrow" style="text-decoration:underline; text-underline-offset:4px;">Scroll to casefiles ↓</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== PHILOSOPHY ===================== -->
+  <section class="section philosophy wrap" id="philosophy">
+    <div class="philosophy-head">
+      <span class="eyebrow">Field notes — 2026</span>
+      <h2>What we're building on right now</h2>
+    </div>
+    <div class="philosophy-grid">
+      <div class="field-note">
+        <span class="num">01</span>
+        <h3>Texture over polish</h3>
+        <p>Grain, stamped edges, and hand-set kerning are back — identities that admit they were made by someone, not generated. We build that imperfection in on purpose.</p>
+      </div>
+      <div class="field-note">
+        <span class="num">02</span>
+        <h3>Distinction, not novelty</h3>
+        <p>Marks are judged on whether they mean something specific to the business, not how unusual they look. Gothic stamps, crests, and foundry marks are getting a second look for exactly this reason.</p>
+      </div>
+      <div class="field-note">
+        <span class="num">03</span>
+        <h3>Designed for a thumbnail</h3>
+        <p>Half of a quick-service brand's first impression now happens at 32 pixels, cropped into a circle, on a delivery app. That constraint shapes the mark before anything else does.</p>
+      </div>
+      <div class="field-note">
+        <span class="num">04</span>
+        <h3>Warm, saturated, appetite-first</h3>
+        <p>Restaurant and food palettes are trading pastel neutrals for real color — rust, cherry, marigold — because warmth reads as flavor from across a parking lot.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== INDEX ===================== -->
+  <section class="section wrap" id="index">
+    <span class="eyebrow">Casefiles</span>
+    <h2 class="philosophy-head" style="margin-top:.5rem;font-family:var(--font-display);font-weight:800;font-stretch:condensed;text-transform:uppercase;font-size:clamp(1.8rem,4vw,2.6rem);">Three jobs, start to finish</h2>
+    <div class="index-list">
+
+      <a class="ticket" href="#case-ember" data-brand="ember">
+        <div class="ticket-no"><span>Job</span><b>001</b></div>
+        <div class="ticket-body">
+          <div class="ticket-mark" style="background:#1C1613;">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:#F1E9DD;--b-accent:#D8501F;"><use href="#icon-ember"/></svg>
+          </div>
+          <div class="ticket-text">
+            <h3>Ember &amp; Grove</h3>
+            <span>Live-fire restaurant · Asheville, NC</span>
+          </div>
+        </div>
+        <div>
+          <div class="ticket-swatches" aria-hidden="true">
+            <i style="background:#1C1613"></i><i style="background:#D8501F"></i><i style="background:#5B6647"></i>
+          </div>
+          <div class="ticket-cta">View casefile →</div>
+        </div>
+      </a>
+
+      <a class="ticket" href="#case-pronto" data-brand="pronto">
+        <div class="ticket-no"><span>Job</span><b>002</b></div>
+        <div class="ticket-body">
+          <div class="ticket-mark" style="background:#1A1310;">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:#FFF6E9;--b-accent:#F7A621;"><use href="#icon-pronto"/></svg>
+          </div>
+          <div class="ticket-text">
+            <h3>Pronto Bird</h3>
+            <span>Fast-casual chicken · Austin, TX</span>
+          </div>
+        </div>
+        <div>
+          <div class="ticket-swatches" aria-hidden="true">
+            <i style="background:#D62828"></i><i style="background:#F7A621"></i><i style="background:#1A1310"></i>
+          </div>
+          <div class="ticket-cta">View casefile →</div>
+        </div>
+      </a>
+
+      <a class="ticket" href="#case-ironclad" data-brand="ironclad">
+        <div class="ticket-no"><span>Job</span><b>003</b></div>
+        <div class="ticket-body">
+          <div class="ticket-mark" style="background:#14202E;">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:#EDEEF0;--b-accent:#E85D25;"><use href="#icon-ironclad"/></svg>
+          </div>
+          <div class="ticket-text">
+            <h3>Ironclad Auto &amp; Cycle</h3>
+            <span>Repair &amp; restoration · Detroit, MI</span>
+          </div>
+        </div>
+        <div>
+          <div class="ticket-swatches" aria-hidden="true">
+            <i style="background:#14202E"></i><i style="background:#E85D25"></i><i style="background:#8C97A6"></i>
+          </div>
+          <div class="ticket-cta">View casefile →</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ===================== CASEFILE 001 — EMBER & GROVE ===================== -->
+  <section class="casefile" id="case-ember" data-brand="ember" style="--b-ink:#1C1613; --b-paper:#F1E9DD; --b-accent:#D8501F; --b-second:#5B6647; --b-third:#8B4225; --b-display:Georgia,'Iowan Old Style','Palatino Linotype',serif; --b-display-weight:400; --b-display-case:none; --b-display-tracking:0; --b-body:-apple-system,'Segoe UI',sans-serif;">
+    <div class="casefile-strip">
+      <span>Job No. 001 — Ember &amp; Grove</span>
+      <span>Category — Full-Service Restaurant</span>
+      <span>Scope — Identity, Signage, Print, Environmental</span>
+    </div>
+    <nav class="tab-strip" role="tablist" aria-label="Ember & Grove casefile pages">
+      <button class="tab-btn" role="tab" aria-selected="true"  data-target="1">01 Story</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="2">02 Logo System</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="3">03 Color &amp; Type</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="4">04 Print</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="5">05 Environmental</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="6">06 Merch &amp; Trade Show</button>
+    </nav>
+
+    <div class="brand-pages">
+
+      <!-- PAGE 1 — STORY -->
+      <article class="brand-page active" data-page="1">
+        <div class="cover-grid">
+          <div class="cover-mark-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:70%;height:70%;color:var(--b-ink);"><use href="#icon-ember"/></svg>
+          </div>
+          <div>
+            <p class="page-kicker">Casefile 001</p>
+            <div class="wordmark">ember <em>&amp;</em> grove</div>
+            <p class="tagline">A single wood-fired hearth, family-style boards, and the oak grove out back that feeds it. West Asheville, North Carolina.</p>
+            <div class="cover-meta">
+              <div><b>Location</b>1204 Haywood Road, Asheville, NC</div>
+              <div><b>Founded</b>2024</div>
+              <div><b>Chef / Owner</b>Marisol Doyle</div>
+              <div><b>Scope</b>Identity, menu system, signage, wraps, merch</div>
+            </div>
+          </div>
+        </div>
+        <div class="story-copy">
+          <p>Marisol Doyle spent six years cooking over coals in San Sebastián before coming home to the Blue Ridge. Ember &amp; Grove is built around one piece of equipment: a wood-fired hearth burning oak and hickory cut from a five-acre grove the restaurant leases twenty minutes up the road. Everything on the menu passes over that fire.</p>
+          <p>The brief asked for a mark that could hold both halves of that story — the fire and the wood — without turning into a campfire cliché. We landed on an ember nested inside an oak leaf: the leaf is the grove, the glow inside it is the hearth. The ampersand between the two words carries a small upward flick, the only place in the wordmark where the fire shows up in the type itself.</p>
+          <p>The palette runs darker and warmer than the usual restaurant cream-and-terracotta pairing — char black is the dominant ground, not an accent, because the dining room itself is dim, lit mostly by the hearth. Bone and ember only show up where the fire would actually reach.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 2 — LOGO SYSTEM -->
+      <article class="brand-page" data-page="2">
+        <p class="page-kicker">Page 02</p>
+        <h2 class="page-title">Logo system</h2>
+        <div class="logo-grid">
+          <div class="lockup-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg>
+            <div class="wordmark" style="font-size:1.5rem;">ember <em>&amp;</em> grove</div>
+            <span class="lockup-label">Primary lockup</span>
+          </div>
+          <div class="lockup-box on-ink">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ember"/></svg>
+            <div class="wordmark" style="font-size:1.5rem;">ember <em>&amp;</em> grove</div>
+            <span class="lockup-label">Reversed, on char</span>
+          </div>
+          <div class="lockup-box">
+            <svg class="icon-wrap" style="width:64px;height:64px;color:var(--b-ink);" viewBox="0 0 100 100"><use href="#icon-ember"/></svg>
+            <span class="lockup-label">Mark only — favicon, menu stamp</span>
+          </div>
+          <div class="lockup-box mono">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink); --b-accent:var(--b-ink);"><use href="#icon-ember"/></svg>
+            <div class="wordmark" style="font-size:1.5rem;">ember &amp; grove</div>
+            <span class="lockup-label">Single-color, laser etch / engrave</span>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Clear space &amp; minimum size</h2>
+        <div class="clearspace-demo">
+          <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg>
+        </div>
+        <ul class="rules-list">
+          <li>Clear space on all sides equals the height of the ember glyph inside the mark — nothing else sits inside that margin.</li>
+          <li>Minimum size: 24px / 0.3in for the mark alone; 120px / 1.2in for the full lockup with wordmark.</li>
+          <li>On menus and signage, the mark may run in char, bone, or single-color etch — never in oak green alone.</li>
+        </ul>
+
+        <h2 class="page-title" style="margin-top:3rem;">Don'ts</h2>
+        <div class="donts-row">
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-skew"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg></div><span class="dont-label">Don't skew</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-stretch"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg></div><span class="dont-label">Don't stretch</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-recolor"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg></div><span class="dont-label">Don't recolor the ember</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="wordmark" style="font-size:1.1rem;text-transform:uppercase;letter-spacing:.05em;">EMBER &amp; GROVE</div><span class="dont-label">Don't set in caps</span></div>
+        </div>
+      </article>
+
+      <!-- PAGE 3 — COLOR & TYPE -->
+      <article class="brand-page" data-page="3">
+        <p class="page-kicker">Page 03</p>
+        <h2 class="page-title">Color &amp; type</h2>
+        <div class="swatch-row">
+          <div class="swatch" style="background:#1C1613;color:#F1E9DD;"><b>Char</b><span>#1C1613 · C61 M56 Y58 K69</span><em>Dominant — 45%</em></div>
+          <div class="swatch" style="background:#F1E9DD;color:#1C1613;"><b>Bone</b><span>#F1E9DD · C3 M6 Y12 K0</span><em>Ground — 35%</em></div>
+          <div class="swatch" style="background:#D8501F;color:#F1E9DD;"><b>Ember</b><span>#D8501F · C4 M78 Y92 K0</span><em>Accent — 12%</em></div>
+          <div class="swatch" style="background:#5B6647;color:#F1E9DD;"><b>Oak</b><span>#5B6647 · C51 M28 Y66 K19</span><em>Secondary — 6%</em></div>
+          <div class="swatch" style="background:#8B4225;color:#F1E9DD;"><b>Rust</b><span>#8B4225 · C31 M67 Y79 K19</span><em>Shadow — 2%</em></div>
+        </div>
+
+        <div class="type-specimen">
+          <div class="type-block">
+            <div class="label-row"><span>Display — hand-kerned italic serif</span><span>Wordmark, menu headers, signage</span></div>
+            <div class="type-display-sample">Wood-roasted, family-style</div>
+            <div class="weight-scale"><span style="font-size:1.4rem;">Aa</span><span style="font-size:1.4rem;font-style:italic;">Aa</span><span style="font-size:1.4rem;font-weight:700;">Aa</span></div>
+          </div>
+          <div class="type-block">
+            <div class="label-row"><span>Body — humanist sans</span><span>Menu copy, signage subtext, print</span></div>
+            <div class="type-body-sample">Half chicken roasted over live oak, calabrian chile butter, charred lemon. Board for four, cut tableside.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — PRINT APPLICATIONS -->
+      <article class="brand-page" data-page="4">
+        <p class="page-kicker">Page 04</p>
+        <h2 class="page-title">Print applications</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Business card</span>
+            <div class="card-stack">
+              <div class="mockup-card alt">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg>
+                <div><div class="cc-name">Marisol Doyle</div><div class="cc-role">Chef / Owner</div></div>
+                <div class="cc-contact">1204 Haywood Rd, Asheville NC<br>(828) 555-0114</div>
+              </div>
+              <div class="mockup-card">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ember"/></svg>
+                <div class="wordmark" style="font-size:1.1rem;">ember <em>&amp;</em> grove</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Letterhead</span>
+            <div class="mockup-letter">
+              <div class="lh-head">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ember"/></svg>
+                <div class="wordmark">ember <em>&amp;</em> grove</div>
+              </div>
+              <div class="lh-body">Hickory Nut Gap Farm —<br><br>Thank you for the pork shoulders that came in Tuesday; the marbling was exactly what the hearth board needed. We'd like to double the standing order through the fall...</div>
+              <div class="lh-foot">1204 HAYWOOD RD · ASHEVILLE NC 28806 · HELLO@EMBERANDGROVE.COM</div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Menu spread</span>
+            <div class="mockup-spread">
+              <div class="panel dark">
+                <div class="wordmark" style="font-size:1rem;">ember <em>&amp;</em> grove</div>
+                <p style="font-size:.65rem;opacity:.7;margin-top:.4rem;">FROM THE HEARTH</p>
+                <div class="menu-item"><span>Wood-Roasted Half Chicken<small>calabrian butter, charred lemon</small></span><span>$28</span></div>
+                <div class="menu-item"><span>Cast-Iron Trout<small>brown butter, pecan</small></span><span>$31</span></div>
+              </div>
+              <div class="panel light">
+                <p style="font-size:.65rem;opacity:.7;">SHARED</p>
+                <div class="menu-item"><span>Hearth Flatbread<small>blue ridge honey, chili crunch</small></span><span>$16</span></div>
+                <div class="menu-item"><span>Charred Carrots<small>sorghum, goat cheese</small></span><span>$14</span></div>
+                <div class="menu-item"><span>Smoked Shoulder Board<small>serves 4</small></span><span>$86</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — ENVIRONMENTAL / OOH -->
+      <article class="brand-page" data-page="5">
+        <p class="page-kicker">Page 05</p>
+        <h2 class="page-title">Environmental &amp; out-of-home</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Storefront signage</span>
+            <div class="mockup-signage">
+              <div class="board">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ember"/></svg>
+                <div class="wordmark" style="font-size:1.4rem;">ember <em>&amp;</em> grove</div>
+              </div>
+              <div class="pole" aria-hidden="true"></div>
+              <div class="base" aria-hidden="true"></div>
+            </div>
+            <p class="caption">Backlit channel letters, char cabinet, ember-lit edge at dusk.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Catering van wrap</span>
+            <div class="mockup-van-wrap">
+              <svg viewBox="0 0 320 150" style="width:100%;">
+                <rect x="10" y="55" width="230" height="55" rx="6" fill="var(--b-ink)"/>
+                <rect x="235" y="68" width="60" height="42" rx="6" fill="var(--b-ink)"/>
+                <polygon points="235,68 275,68 268,90 235,90" fill="var(--b-paper)" opacity=".85"/>
+                <rect x="10" y="82" width="230" height="12" fill="var(--b-accent)"/>
+                <circle cx="90" cy="120" r="16" fill="#4b4b46"/>
+                <circle cx="255" cy="120" r="16" fill="#4b4b46"/>
+              </svg>
+              <div style="position:relative;">
+                <div style="position:absolute; top:-72px; left:9%; display:flex; align-items:center; gap:.4rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:var(--b-paper);"><use href="#icon-ember"/></svg>
+                  <span class="wordmark" style="font-size:.95rem;color:var(--b-paper);">ember <em>&amp;</em> grove</span>
+                </div>
+              </div>
+            </div>
+            <p class="caption">Weekend farmers-market cart &amp; catering van.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Highway billboard</span>
+            <div class="mockup-billboard-scene">
+              <div style="max-width:320px;margin:0 auto;">
+                <div style="background:var(--b-ink);color:var(--b-paper);padding:1.5rem;border-radius:4px;border-bottom:6px solid var(--b-accent);box-shadow:0 20px 36px -16px rgba(0,0,0,.45);">
+                  <div class="wordmark" style="font-size:1.3rem;">ember <em>&amp;</em> grove</div>
+                  <p style="font-size:.7rem;margin-top:.5rem;opacity:.85;">EXIT 33 · WOOD-FIRED · OPEN TIL 10</p>
+                </div>
+                <div style="display:flex;justify-content:space-around;margin-top:0;">
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                </div>
+              </div>
+            </div>
+            <p class="caption">I-40 approach, two miles out.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — MERCH & TRADE SHOW -->
+      <article class="brand-page" data-page="6">
+        <p class="page-kicker">Page 06</p>
+        <h2 class="page-title">Merchandise &amp; events</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Staff / retail tee</span>
+            <div class="mockup-shirt-wrap">
+              <svg viewBox="0 0 200 220" style="width:160px;">
+                <path d="M60 20 L80 5 L100 15 L120 5 L140 20 L160 45 L140 60 L130 50 L130 200 L70 200 L70 50 L60 60 L40 45 Z" fill="#E7E4DC" stroke="var(--b-ink)" stroke-width="2"/>
+                <svg x="80" y="80" width="40" height="40" viewBox="0 0 100 100"><use href="#icon-ember" style="color:var(--b-ink);"/></svg>
+              </svg>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">To-go cup &amp; sleeve</span>
+            <div class="mockup-pack-row">
+              <div style="position:relative;">
+                <svg viewBox="0 0 140 200" style="width:110px;">
+                  <path d="M35 20 L105 20 L92 190 L48 190 Z" fill="var(--b-paper)" stroke="var(--b-ink)" stroke-width="2"/>
+                  <ellipse cx="70" cy="20" rx="35" ry="8" fill="var(--b-ink)"/>
+                  <path d="M42 95 L98 95 L92 140 L48 140 Z" fill="var(--b-accent)"/>
+                </svg>
+                <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:22px;height:22px;color:var(--b-paper);"><use href="#icon-ember"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Farmers-market booth</span>
+            <div class="mockup-booth">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                <div style="width:100%;max-width:320px;height:120px;background:var(--b-ink);border-radius:6px 6px 0 0;border-top:6px solid var(--b-accent);display:flex;align-items:center;justify-content:center;gap:.5rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:30px;height:30px;color:var(--b-paper);"><use href="#icon-ember"/></svg>
+                  <span class="wordmark" style="font-size:1.1rem;color:var(--b-paper);">ember <em>&amp;</em> grove</span>
+                </div>
+                <div style="width:80%;max-width:250px;height:40px;background:var(--b-paper);border:2px solid var(--b-ink);border-radius:4px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Quick-reference recap</h2>
+        <div class="recap-grid">
+          <div class="recap-card"><h4>Always</h4><ul><li>Char as dominant ground</li><li>Hand-kerned italic serif for the wordmark</li><li>Full clear space around the mark</li></ul></div>
+          <div class="recap-card"><h4>Never</h4><ul><li>Skew, stretch, or recolor the ember</li><li>Set the wordmark in all caps</li><li>Pair oak green with rust directly</li></ul></div>
+          <div class="recap-card"><h4>When in doubt</h4><ul><li>Default to the reversed lockup on char</li><li>Let bone carry the negative space</li></ul></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ===================== CASEFILE 002 — PRONTO BIRD ===================== -->
+  <section class="casefile" id="case-pronto" data-brand="pronto" style="--b-ink:#1A1310; --b-paper:#FFF6E9; --b-accent:#D62828; --b-second:#F7A621; --b-third:#1A1310; --b-display:'Arial Black','Helvetica Neue',Arial,sans-serif; --b-display-weight:900; --b-display-case:uppercase; --b-display-tracking:-.02em; --b-body:-apple-system,'Segoe UI',sans-serif;">
+    <div class="casefile-strip">
+      <span>Job No. 002 — Pronto Bird</span>
+      <span>Category — Fast-Casual, Quick-Service</span>
+      <span>Scope — Identity, Packaging, Delivery, Signage</span>
+    </div>
+    <nav class="tab-strip" role="tablist" aria-label="Pronto Bird casefile pages">
+      <button class="tab-btn" role="tab" aria-selected="true"  data-target="1">01 Story</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="2">02 Logo System</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="3">03 Color &amp; Type</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="4">04 Print</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="5">05 Environmental</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="6">06 Merch &amp; Trade Show</button>
+    </nav>
+
+    <div class="brand-pages">
+
+      <!-- PAGE 1 — STORY -->
+      <article class="brand-page active" data-page="1">
+        <div class="cover-grid">
+          <div class="cover-mark-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:70%;height:70%;color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+          </div>
+          <div>
+            <p class="page-kicker">Casefile 002</p>
+            <div class="wordmark">pronto <em>bird</em></div>
+            <p class="tagline">Nashville-hot-adjacent fried chicken sandwiches, built app-first. East Austin, Texas.</p>
+            <div class="cover-meta">
+              <div><b>Location</b>2114 E 6th St, Austin, TX</div>
+              <div><b>Founded</b>2022, as a food truck</div>
+              <div><b>Founders</b>Deja Marsh &amp; Tobias Kim</div>
+              <div><b>Scope</b>Identity, packaging, app icon, signage, wraps</div>
+            </div>
+          </div>
+        </div>
+        <div class="story-copy">
+          <p>Deja Marsh and Tobias Kim ran a chicken sandwich truck out of the Meanwhile Truck Yard for two years before opening a brick-and-mortar with a drive-thru window built for delivery drivers, not dine-in traffic. Ninety percent of Pronto Bird's orders now happen through a phone screen — which meant the logo had a harder job than most: survive being cropped into a circle at 32 pixels next to nine other restaurant icons.</p>
+          <p>The rooster head mark was drawn to that constraint first. The comb is three flat angled tabs instead of a curved crest — curves disappear at thumbnail size, angles don't. The beak is a single triangle. Nothing in the mark depends on a line thinner than it needs to be to survive a phone screen.</p>
+          <p>Spice levels are named for weather — Breeze, Gust, Storm, Squall — which gave the packaging system a second layer of color-coding beyond the core palette, without touching the logo itself.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 2 — LOGO SYSTEM -->
+      <article class="brand-page" data-page="2">
+        <p class="page-kicker">Page 02</p>
+        <h2 class="page-title">Logo system</h2>
+        <div class="logo-grid">
+          <div class="lockup-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+            <div class="wordmark" style="font-size:1.3rem;">pronto <em>bird</em></div>
+            <span class="lockup-label">Primary lockup</span>
+          </div>
+          <div class="lockup-box on-ink">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-pronto"/></svg>
+            <div class="wordmark" style="font-size:1.3rem;">pronto <em>bird</em></div>
+            <span class="lockup-label">Reversed, on char</span>
+          </div>
+          <div class="lockup-box" style="background:var(--b-accent);">
+            <svg class="icon-wrap" style="width:64px;height:64px;color:var(--b-paper);--b-accent:var(--b-paper);" viewBox="0 0 100 100"><use href="#icon-pronto"/></svg>
+            <span class="lockup-label" style="color:var(--b-paper);">App icon — cropped to circle</span>
+          </div>
+          <div class="lockup-box mono">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink); --b-accent:var(--b-ink);"><use href="#icon-pronto"/></svg>
+            <div class="wordmark" style="font-size:1.3rem;">pronto bird</div>
+            <span class="lockup-label">Single-color, bag stamp</span>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Clear space &amp; minimum size</h2>
+        <div class="clearspace-demo">
+          <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+        </div>
+        <ul class="rules-list">
+          <li>Clear space equals the width of the beak on all sides — the mark needs to survive a hard crop, so nothing crowds it.</li>
+          <li>Minimum size: 32px for the app icon alone; 100px / 1in for the full lockup in print.</li>
+          <li>The eye cutout must always be the paper color — it's the one detail that keeps the mark from reading as a solid blob at small sizes.</li>
+        </ul>
+
+        <h2 class="page-title" style="margin-top:3rem;">Don'ts</h2>
+        <div class="donts-row">
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-skew"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg></div><span class="dont-label">Don't skew</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-stretch"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg></div><span class="dont-label">Don't stretch</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-recolor"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg></div><span class="dont-label">Don't recolor the comb</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="wordmark" style="font-size:1.1rem;font-style:italic;text-transform:none;">pronto bird</div><span class="dont-label">Don't italicize or script-ify</span></div>
+        </div>
+      </article>
+
+      <!-- PAGE 3 — COLOR & TYPE -->
+      <article class="brand-page" data-page="3">
+        <p class="page-kicker">Page 03</p>
+        <h2 class="page-title">Color &amp; type</h2>
+        <div class="swatch-row">
+          <div class="swatch" style="background:#D62828;color:#FFF6E9;"><b>Cherry</b><span>#D62828 · C10 M93 Y88 K2</span><em>Dominant — 40%</em></div>
+          <div class="swatch" style="background:#F7A621;color:#1A1310;"><b>Marigold</b><span>#F7A621 · C0 M40 Y90 K0</span><em>Secondary — 25%</em></div>
+          <div class="swatch" style="background:#FFF6E9;color:#1A1310;"><b>Cream</b><span>#FFF6E9 · C0 M2 Y6 K0</span><em>Ground — 25%</em></div>
+          <div class="swatch" style="background:#1A1310;color:#FFF6E9;"><b>Char</b><span>#1A1310 · C0 M25 Y35 K90</span><em>Accent — 10%</em></div>
+        </div>
+
+        <div class="type-specimen">
+          <div class="type-block">
+            <div class="label-row"><span>Display — heavy condensed sans</span><span>Wordmark, menu board, packaging</span></div>
+            <div class="type-display-sample">Hot enough to sign for</div>
+            <div class="weight-scale"><span style="font-size:1.4rem;font-weight:400;">Aa</span><span style="font-size:1.4rem;font-weight:700;">Aa</span><span style="font-size:1.4rem;font-weight:900;">Aa</span></div>
+          </div>
+          <div class="type-block">
+            <div class="label-row"><span>Body — plain sans, tabular numerals</span><span>Menu prices, app copy, receipts</span></div>
+            <div class="type-body-sample">The Storm Sandwich — buttermilk-brined thigh, pickle, house hot honey. Spice level: hot. Comes with a napkin warning.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — PRINT APPLICATIONS -->
+      <article class="brand-page" data-page="4">
+        <p class="page-kicker">Page 04</p>
+        <h2 class="page-title">Print applications</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Business card</span>
+            <div class="card-stack">
+              <div class="mockup-card alt">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+                <div><div class="cc-name">Deja Marsh</div><div class="cc-role">Co-Founder</div></div>
+                <div class="cc-contact">2114 E 6th St, Austin TX<br>partnerships@prontobird.com</div>
+              </div>
+              <div class="mockup-card" style="background:var(--b-accent);">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);--b-accent:var(--b-paper);"><use href="#icon-pronto"/></svg>
+                <div class="wordmark" style="font-size:1.1rem;">pronto bird</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Order ticket</span>
+            <div style="width:210px;background:var(--b-paper);border:1px dashed var(--b-ink);padding:1rem;font-family:var(--font-mono);font-size:.68rem;color:var(--b-ink);">
+              <div style="display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--b-ink);padding-bottom:.5rem;margin-bottom:.5rem;">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="width:18px;height:18px;color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+                <b>PRONTO BIRD</b>
+              </div>
+              <div>1× STORM SANDWICH .... $9.25</div>
+              <div>1× LOADED FRIES ........ $5.50</div>
+              <div>ORDER #0442 — APP PICKUP</div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Menu board</span>
+            <div class="mockup-spread">
+              <div class="panel dark">
+                <div class="wordmark" style="font-size:1rem;">pronto <em>bird</em></div>
+                <p style="font-size:.65rem;opacity:.7;margin-top:.4rem;">SANDWICHES — NAMED FOR THE WEATHER</p>
+                <div class="menu-item"><span>Breeze<small>mild</small></span><span>$8.75</span></div>
+                <div class="menu-item"><span>Gust<small>medium</small></span><span>$8.75</span></div>
+                <div class="menu-item"><span>Storm<small>hot</small></span><span>$9.25</span></div>
+              </div>
+              <div class="panel light">
+                <p style="font-size:.65rem;opacity:.7;">SIDES</p>
+                <div class="menu-item"><span>Squall<small>extra hot — waiver required</small></span><span>$9.75</span></div>
+                <div class="menu-item"><span>Loaded Waffle Fries</span><span>$5.50</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — ENVIRONMENTAL / OOH -->
+      <article class="brand-page" data-page="5">
+        <p class="page-kicker">Page 05</p>
+        <h2 class="page-title">Environmental &amp; out-of-home</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Drive-thru menu board</span>
+            <div class="mockup-signage">
+              <div class="board" style="border-color:var(--b-second);">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-pronto"/></svg>
+                <div class="wordmark" style="font-size:1.3rem;">pronto <em>bird</em></div>
+              </div>
+              <div class="pole" aria-hidden="true"></div>
+              <div class="base" aria-hidden="true"></div>
+            </div>
+            <p class="caption">Order + pickup window, East 6th location.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Original food truck wrap</span>
+            <div class="mockup-van-wrap">
+              <svg viewBox="0 0 320 150" style="width:100%;">
+                <rect x="10" y="55" width="230" height="55" rx="6" fill="var(--b-accent)"/>
+                <rect x="235" y="68" width="60" height="42" rx="6" fill="var(--b-ink)"/>
+                <polygon points="235,68 275,68 268,90 235,90" fill="var(--b-paper)" opacity=".85"/>
+                <rect x="10" y="82" width="230" height="12" fill="var(--b-second)"/>
+                <circle cx="90" cy="120" r="16" fill="#3a3128"/>
+                <circle cx="255" cy="120" r="16" fill="#3a3128"/>
+              </svg>
+              <div style="position:relative;">
+                <div style="position:absolute; top:-72px; left:9%; display:flex; align-items:center; gap:.4rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:var(--b-paper);--b-accent:var(--b-paper);"><use href="#icon-pronto"/></svg>
+                  <span class="wordmark" style="font-size:.95rem;color:var(--b-paper);">pronto bird</span>
+                </div>
+              </div>
+            </div>
+            <p class="caption">Still runs weekends at Meanwhile Truck Yard.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Highway billboard</span>
+            <div class="mockup-billboard-scene">
+              <div style="max-width:320px;margin:0 auto;">
+                <div style="background:var(--b-accent);color:var(--b-paper);padding:1.5rem;border-radius:4px;border-bottom:6px solid var(--b-second);box-shadow:0 20px 36px -16px rgba(0,0,0,.45);">
+                  <div class="wordmark" style="font-size:1.3rem;">pronto bird</div>
+                  <p style="font-size:.7rem;margin-top:.5rem;opacity:.9;">ON THE APP · 22 MIN AVG</p>
+                </div>
+                <div style="display:flex;justify-content:space-around;">
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                </div>
+              </div>
+            </div>
+            <p class="caption">I-35 southbound, near downtown exit.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — MERCH & TRADE SHOW -->
+      <article class="brand-page" data-page="6">
+        <p class="page-kicker">Page 06</p>
+        <h2 class="page-title">Merchandise &amp; events</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Crew tee</span>
+            <div class="mockup-shirt-wrap">
+              <svg viewBox="0 0 200 220" style="width:160px;">
+                <path d="M60 20 L80 5 L100 15 L120 5 L140 20 L160 45 L140 60 L130 50 L130 200 L70 200 L70 50 L60 60 L40 45 Z" fill="var(--b-accent)" stroke="var(--b-ink)" stroke-width="2"/>
+                <svg x="80" y="80" width="40" height="40" viewBox="0 0 100 100"><use href="#icon-pronto" style="color:var(--b-paper);--b-accent:var(--b-paper);"/></svg>
+              </svg>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Bag &amp; cup</span>
+            <div class="mockup-pack-row">
+              <div style="position:relative;">
+                <svg viewBox="0 0 140 200" style="width:100px;">
+                  <path d="M25 32 L95 32 L105 190 L15 190 Z" fill="var(--b-second)" stroke="var(--b-ink)" stroke-width="2"/>
+                  <rect x="38" y="18" width="44" height="14" fill="var(--b-ink)"/>
+                </svg>
+                <div style="position:absolute;top:80px;left:50%;transform:translateX(-50%);">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:20px;height:20px;color:var(--b-ink);"><use href="#icon-pronto"/></svg>
+                </div>
+              </div>
+              <div style="position:relative;">
+                <svg viewBox="0 0 140 200" style="width:90px;">
+                  <path d="M35 20 L105 20 L92 190 L48 190 Z" fill="var(--b-paper)" stroke="var(--b-ink)" stroke-width="2"/>
+                  <ellipse cx="70" cy="20" rx="35" ry="8" fill="var(--b-ink)"/>
+                  <path d="M42 95 L98 95 L92 140 L48 140 Z" fill="var(--b-accent)"/>
+                </svg>
+                <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:18px;height:18px;color:var(--b-paper);--b-accent:var(--b-paper);"><use href="#icon-pronto"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Festival pop-up booth</span>
+            <div class="mockup-booth">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                <div style="width:100%;max-width:320px;height:120px;background:var(--b-accent);border-radius:6px 6px 0 0;border-top:6px solid var(--b-second);display:flex;align-items:center;justify-content:center;gap:.5rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:30px;height:30px;color:var(--b-paper);--b-accent:var(--b-paper);"><use href="#icon-pronto"/></svg>
+                  <span class="wordmark" style="font-size:1.1rem;color:var(--b-paper);">pronto bird</span>
+                </div>
+                <div style="width:80%;max-width:250px;height:40px;background:var(--b-paper);border:2px solid var(--b-ink);border-radius:4px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Quick-reference recap</h2>
+        <div class="recap-grid">
+          <div class="recap-card"><h4>Always</h4><ul><li>Cherry as the dominant color</li><li>Angular comb — three flat tabs, no curves</li><li>Paper-colored eye cutout</li></ul></div>
+          <div class="recap-card"><h4>Never</h4><ul><li>Round out the comb</li><li>Italicize or script the wordmark</li><li>Drop the mark below 32px without testing the crop</li></ul></div>
+          <div class="recap-card"><h4>When in doubt</h4><ul><li>Test at app-icon size first</li><li>Cherry dominant, marigold for spice callouts only</li></ul></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ===================== CASEFILE 003 — IRONCLAD AUTO & CYCLE ===================== -->
+  <section class="casefile" id="case-ironclad" data-brand="ironclad" style="--b-ink:#14202E; --b-paper:#EDEEF0; --b-accent:#E85D25; --b-second:#8C97A6; --b-third:#14202E; --b-display:Rockwell,'Roboto Slab',Georgia,serif; --b-display-weight:800; --b-display-case:uppercase; --b-display-tracking:-.03em; --b-body:-apple-system,'Segoe UI',sans-serif;">
+    <div class="casefile-strip">
+      <span>Job No. 003 — Ironclad Auto &amp; Cycle</span>
+      <span>Category — Repair &amp; Restoration</span>
+      <span>Scope — Identity, Signage, Print, Fleet</span>
+    </div>
+    <nav class="tab-strip" role="tablist" aria-label="Ironclad casefile pages">
+      <button class="tab-btn" role="tab" aria-selected="true"  data-target="1">01 Story</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="2">02 Logo System</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="3">03 Color &amp; Type</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="4">04 Print</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="5">05 Environmental</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-target="6">06 Merch &amp; Trade Show</button>
+    </nav>
+
+    <div class="brand-pages">
+
+      <!-- PAGE 1 — STORY -->
+      <article class="brand-page active" data-page="1">
+        <div class="cover-grid">
+          <div class="cover-mark-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="width:70%;height:70%;color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+          </div>
+          <div>
+            <p class="page-kicker">Casefile 003</p>
+            <div class="wordmark">Ironclad</div>
+            <p class="tagline">Third-generation repair shop, now doing EV diagnostics alongside classic motorcycle restoration. Corktown, Detroit.</p>
+            <div class="cover-meta">
+              <div><b>Location</b>1889 Bagley Street, Detroit, MI</div>
+              <div><b>Founded</b>1962, by Wesley Okafor Sr.</div>
+              <div><b>Current owner</b>Wesley Okafor III</div>
+              <div><b>Scope</b>Identity, work orders, signage, fleet, merch</div>
+            </div>
+          </div>
+        </div>
+        <div class="story-copy">
+          <p>Wesley Okafor Sr. opened the shop in 1962, two blocks from the old Michigan Central Station, fixing whatever the neighborhood's plant workers drove home. Sixty-plus years and two generations later, his grandson runs the same bay — now split between EV battery diagnostics and ground-up motorcycle restorations, sometimes in the same afternoon.</p>
+          <p>The family didn't want a mark that chased a trend. They wanted something that looked like it belonged on the building in 1962 and still would in 2062 — so we went to the source: old Detroit machine-shop foundry stamps, the kind pressed directly into cast parts. The crest is a pointed-arch shield, the shape those stamps actually used, built around a wrench driven through a hex nut.</p>
+          <p>Everything after that follows the same logic — navy and safety orange, because that's what was already on the shop's toolboxes and the OSHA signage bolted to the wall, not because it tested well in a mood board.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 2 — LOGO SYSTEM -->
+      <article class="brand-page" data-page="2">
+        <p class="page-kicker">Page 02</p>
+        <h2 class="page-title">Logo system</h2>
+        <div class="logo-grid">
+          <div class="lockup-box">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+            <div class="wordmark" style="font-size:1.4rem;">Ironclad</div>
+            <span class="lockup-label">Primary lockup</span>
+          </div>
+          <div class="lockup-box on-ink">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ironclad"/></svg>
+            <div class="wordmark" style="font-size:1.4rem;">Ironclad</div>
+            <span class="lockup-label">Reversed, on navy</span>
+          </div>
+          <div class="lockup-box">
+            <svg class="icon-wrap" style="width:64px;height:64px;color:var(--b-ink);" viewBox="0 0 100 100"><use href="#icon-ironclad"/></svg>
+            <span class="lockup-label">Crest only — hood stamp, patch</span>
+          </div>
+          <div class="lockup-box mono">
+            <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink); --b-accent:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+            <div class="wordmark" style="font-size:1.4rem;">Ironclad</div>
+            <span class="lockup-label">Single-color, laser-cut metal</span>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Clear space &amp; minimum size</h2>
+        <div class="clearspace-demo">
+          <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+        </div>
+        <ul class="rules-list">
+          <li>Clear space on all sides equals the width of the wrench bar inside the crest.</li>
+          <li>Minimum size: 20px / 0.25in for the crest alone; 150px / 1.5in for the full lockup — the shield needs room to read as a shield, not a badge blob.</li>
+          <li>The wrench bar is always safety orange; it is the one required color even in single-color applications.</li>
+        </ul>
+
+        <h2 class="page-title" style="margin-top:3rem;">Don'ts</h2>
+        <div class="donts-row">
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-skew"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg></div><span class="dont-label">Don't skew</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-stretch"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg></div><span class="dont-label">Don't stretch</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="icon-wrap dont-icon dont-recolor"><svg viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg></div><span class="dont-label">Don't recolor the shield</span></div>
+          <div class="dont-box"><span class="no-badge"></span><div class="wordmark" style="font-size:1.1rem;font-weight:400;letter-spacing:0;">Ironclad</div><span class="dont-label">Don't lighten the weight</span></div>
+        </div>
+      </article>
+
+      <!-- PAGE 3 — COLOR & TYPE -->
+      <article class="brand-page" data-page="3">
+        <p class="page-kicker">Page 03</p>
+        <h2 class="page-title">Color &amp; type</h2>
+        <div class="swatch-row">
+          <div class="swatch" style="background:#14202E;color:#EDEEF0;"><b>Navy</b><span>#14202E · C88 M65 Y42 K35</span><em>Dominant — 50%</em></div>
+          <div class="swatch" style="background:#EDEEF0;color:#14202E;"><b>Steel White</b><span>#EDEEF0 · C2 M1 Y0 K0</span><em>Ground — 30%</em></div>
+          <div class="swatch" style="background:#E85D25;color:#14202E;"><b>Safety Orange</b><span>#E85D25 · C0 M67 Y85 K0</span><em>Accent — 12%</em></div>
+          <div class="swatch" style="background:#8C97A6;color:#14202E;"><b>Steel</b><span>#8C97A6 · C24 M13 Y8 K12</span><em>Secondary — 8%</em></div>
+        </div>
+
+        <div class="type-specimen">
+          <div class="type-block">
+            <div class="label-row"><span>Display — bold condensed slab</span><span>Wordmark, shop signage, fleet</span></div>
+            <div class="type-display-sample">Est. 1962, still in the family</div>
+            <div class="weight-scale"><span style="font-size:1.4rem;font-weight:400;">Aa</span><span style="font-size:1.4rem;font-weight:700;">Aa</span><span style="font-size:1.4rem;font-weight:900;">Aa</span></div>
+          </div>
+          <div class="type-block">
+            <div class="label-row"><span>Body — utilitarian sans, tabular numerals</span><span>Work orders, estimates, signage subtext</span></div>
+            <div class="type-body-sample">Battery pack health check, EV — includes cell balance report and a printed summary you can take to your insurer.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — PRINT APPLICATIONS -->
+      <article class="brand-page" data-page="4">
+        <p class="page-kicker">Page 04</p>
+        <h2 class="page-title">Print applications</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Business card</span>
+            <div class="card-stack">
+              <div class="mockup-card alt">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+                <div><div class="cc-name">Wesley Okafor III</div><div class="cc-role">Owner / Master Technician</div></div>
+                <div class="cc-contact">1889 Bagley St, Detroit MI<br>(313) 555-0192</div>
+              </div>
+              <div class="mockup-card">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ironclad"/></svg>
+                <div class="wordmark" style="font-size:1.1rem;">Ironclad</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Work order</span>
+            <div style="width:220px;background:var(--b-paper);border:1px solid var(--b-ink);padding:1rem;font-family:var(--font-mono);font-size:.65rem;color:var(--b-ink);">
+              <div style="display:flex;align-items:center;gap:.4rem;border-bottom:2px solid var(--b-accent);padding-bottom:.5rem;margin-bottom:.5rem;">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="width:20px;height:20px;color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+                <b>IRONCLAD — WORK ORDER</b>
+              </div>
+              <div>DIAGNOSTIC SCAN (EV) ..... $95</div>
+              <div>BRAKE SVC, FRONT AXLE .... $180</div>
+              <div>TECH: J. OKAFOR — BAY 2</div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Service price sheet</span>
+            <div class="mockup-spread">
+              <div class="panel dark">
+                <div class="wordmark" style="font-size:1rem;">Ironclad</div>
+                <p style="font-size:.65rem;opacity:.7;margin-top:.4rem;">DIAGNOSTICS</p>
+                <div class="menu-item"><span>Diagnostic Scan<small>EV + ICE</small></span><span>$95</span></div>
+                <div class="menu-item"><span>Battery Health Check<small>EV pack</small></span><span>$65</span></div>
+              </div>
+              <div class="panel light">
+                <p style="font-size:.65rem;opacity:.7;">SERVICE</p>
+                <div class="menu-item"><span>Brake Service<small>per axle</small></span><span>$180</span></div>
+                <div class="menu-item"><span>Classic Moto Tune-Up</span><span>$210</span></div>
+                <div class="menu-item"><span>State Inspection</span><span>$45</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — ENVIRONMENTAL / OOH -->
+      <article class="brand-page" data-page="5">
+        <p class="page-kicker">Page 05</p>
+        <h2 class="page-title">Environmental &amp; out-of-home</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Shop signage</span>
+            <div class="mockup-signage">
+              <div class="board">
+                <svg class="icon-wrap" viewBox="0 0 100 100" style="color:var(--b-paper);"><use href="#icon-ironclad"/></svg>
+                <div class="wordmark" style="font-size:1.4rem;">Ironclad</div>
+              </div>
+              <div class="pole" aria-hidden="true"></div>
+              <div class="base" aria-hidden="true"></div>
+            </div>
+            <p class="caption">Steel-fabricated sign, same bracket since 1962.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Tow &amp; service van wrap</span>
+            <div class="mockup-van-wrap">
+              <svg viewBox="0 0 320 150" style="width:100%;">
+                <rect x="10" y="55" width="230" height="55" rx="6" fill="var(--b-ink)"/>
+                <rect x="235" y="68" width="60" height="42" rx="6" fill="var(--b-ink)"/>
+                <polygon points="235,68 275,68 268,90 235,90" fill="var(--b-paper)" opacity=".85"/>
+                <rect x="10" y="82" width="230" height="12" fill="var(--b-accent)"/>
+                <circle cx="90" cy="120" r="16" fill="#3a3f45"/>
+                <circle cx="255" cy="120" r="16" fill="#3a3f45"/>
+              </svg>
+              <div style="position:relative;">
+                <div style="position:absolute; top:-72px; left:9%; display:flex; align-items:center; gap:.4rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:26px;height:26px;color:var(--b-paper);"><use href="#icon-ironclad"/></svg>
+                  <span class="wordmark" style="font-size:.95rem;color:var(--b-paper);">Ironclad</span>
+                </div>
+              </div>
+            </div>
+            <p class="caption">Flatbed &amp; mobile diagnostic van.</p>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Highway billboard</span>
+            <div class="mockup-billboard-scene">
+              <div style="max-width:320px;margin:0 auto;">
+                <div style="background:var(--b-ink);color:var(--b-paper);padding:1.5rem;border-radius:4px;border-bottom:6px solid var(--b-accent);box-shadow:0 20px 36px -16px rgba(0,0,0,.45);">
+                  <div class="wordmark" style="font-size:1.3rem;">Ironclad</div>
+                  <p style="font-size:.7rem;margin-top:.5rem;opacity:.85;">EV &amp; CLASSIC · CORKTOWN · SINCE 1962</p>
+                </div>
+                <div style="display:flex;justify-content:space-around;">
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                  <div style="width:8px;height:44px;background:#57544a;"></div>
+                </div>
+              </div>
+            </div>
+            <p class="caption">I-75 approach, Corktown exit.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — MERCH & TRADE SHOW -->
+      <article class="brand-page" data-page="6">
+        <p class="page-kicker">Page 06</p>
+        <h2 class="page-title">Merchandise &amp; events</h2>
+        <div class="app-grid">
+          <div class="app-block">
+            <span class="app-label">Shop tee</span>
+            <div class="mockup-shirt-wrap">
+              <svg viewBox="0 0 200 220" style="width:160px;">
+                <path d="M60 20 L80 5 L100 15 L120 5 L140 20 L160 45 L140 60 L130 50 L130 200 L70 200 L70 50 L60 60 L40 45 Z" fill="var(--b-ink)" stroke="var(--b-ink)" stroke-width="2"/>
+                <svg x="80" y="80" width="40" height="40" viewBox="0 0 100 100"><use href="#icon-ironclad" style="color:var(--b-paper);"/></svg>
+              </svg>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Shop tumbler</span>
+            <div class="mockup-pack-row">
+              <div style="position:relative;">
+                <svg viewBox="0 0 140 200" style="width:100px;">
+                  <path d="M40 20 L100 20 L94 190 L46 190 Z" fill="var(--b-second)" stroke="var(--b-ink)" stroke-width="2"/>
+                  <path d="M44 95 L96 95 L92 140 L48 140 Z" fill="var(--b-accent)"/>
+                </svg>
+                <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:20px;height:20px;color:var(--b-ink);"><use href="#icon-ironclad"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="app-block">
+            <span class="app-label">Classic car show booth</span>
+            <div class="mockup-booth">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                <div style="width:100%;max-width:320px;height:120px;background:var(--b-ink);border-radius:6px 6px 0 0;border-top:6px solid var(--b-accent);display:flex;align-items:center;justify-content:center;gap:.5rem;">
+                  <svg class="icon-wrap" viewBox="0 0 100 100" style="width:30px;height:30px;color:var(--b-paper);"><use href="#icon-ironclad"/></svg>
+                  <span class="wordmark" style="font-size:1.1rem;color:var(--b-paper);">Ironclad</span>
+                </div>
+                <div style="width:80%;max-width:250px;height:40px;background:var(--b-paper);border:2px solid var(--b-ink);border-radius:4px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="margin-top:3rem;">Quick-reference recap</h2>
+        <div class="recap-grid">
+          <div class="recap-card"><h4>Always</h4><ul><li>Navy as the dominant color</li><li>Orange reserved for the wrench bar and key accents</li><li>Full shield shape — never crop the crest</li></ul></div>
+          <div class="recap-card"><h4>Never</h4><ul><li>Lighten the display weight</li><li>Recolor the shield outline</li><li>Run the crest below 20px</li></ul></div>
+          <div class="recap-card"><h4>When in doubt</h4><ul><li>Default to the reversed lockup on navy</li><li>Let steel carry secondary text, never headlines</li></ul></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="shell-foot">
+    <div class="foot-mark">Roadside<span style="color:var(--rs-signal)">.</span></div>
+    <p>A concept studio built to demonstrate 2026-aligned identity work across restaurant, quick-service, and repair categories — full systems, not just marks.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.casefile').forEach(function(cf){
+    var tabs = cf.querySelectorAll('.tab-btn');
+    var pages = cf.querySelectorAll('.brand-page');
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var target = btn.getAttribute('data-target');
+        tabs.forEach(function(b){ b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+        pages.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-page') === target); });
+      });
+    });
+  });
+
+  var root = document.documentElement;
+  document.querySelectorAll('[data-theme-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var mode = btn.getAttribute('data-theme-btn');
+      root.setAttribute('data-theme', mode);
+      document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+    });
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if(el){
+        e.preventDefault();
+        el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
